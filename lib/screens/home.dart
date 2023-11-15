@@ -12,6 +12,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final todoList = ToDo.todoList();
+  final _todoController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +41,10 @@ class _HomeState extends State<Home> {
                         ),
                       ),
                       for ( ToDo toDoo in todoList)
-                        ToDoItem(todo: toDoo,),
+                        ToDoItem(todo: toDoo,
+                        onToDoChanged: _handleToDoChange,
+                        onDeleteItem: _deleteToDoItem,
+                        ),
                     ],
                   )
                 )
@@ -71,6 +75,7 @@ class _HomeState extends State<Home> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: TextField(
+                    controller: _todoController,
                     decoration: InputDecoration(
                       hintText: 'Add new todo here',
                       border: InputBorder.none
@@ -85,7 +90,9 @@ class _HomeState extends State<Home> {
                 child: ElevatedButton(
                   child: Text('+',
                   style: TextStyle(fontSize: 40, ),),
-                  onPressed: () {},
+                  onPressed: () {
+                    _addToDoItem(_todoController.text);
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: styleGreen,
                     minimumSize: Size(60, 60),
@@ -100,8 +107,26 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void _handleToDoChange(){
-    
+  void _handleToDoChange(ToDo todo){
+    setState(() {
+      todo.isDone = !todo.isDone;
+    });
+  }
+
+  void _deleteToDoItem(String id){
+    setState(() {
+      todoList.removeWhere((item) => item.id == id);
+    });
+  }
+
+  void _addToDoItem(String todo){
+    setState(() {
+      todoList.add(
+      ToDo(id: DateTime.now()
+      .millisecondsSinceEpoch.toString(), 
+      todoText: todo));
+    });
+    _todoController.clear();
   }
 
   Widget searcBox() {
