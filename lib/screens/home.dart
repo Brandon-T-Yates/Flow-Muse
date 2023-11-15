@@ -4,7 +4,7 @@ import '../widgets/todo_items.dart';
 import '../model/todo.dart';
 
 class Home extends StatefulWidget {
-  Home({Key? key}) : super(key: key);
+  const Home({Key? key}) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
@@ -12,7 +12,14 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final todoList = ToDo.todoList();
+  List<ToDo> _foundToDo = [];
   final _todoController = TextEditingController();
+
+  @override
+  void initState(){
+    _foundToDo = todoList;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +39,7 @@ class _HomeState extends State<Home> {
                   child: ListView(
                     children: [
                       Container(
-                        margin: EdgeInsets.only(top: 50, bottom: 20),
+                        margin: const EdgeInsets.only(top: 50, bottom: 20),
                         child: const Text(
                           'ToDos',
                           style: TextStyle(
@@ -40,7 +47,7 @@ class _HomeState extends State<Home> {
                           ),
                         ),
                       ),
-                      for ( ToDo toDoo in todoList)
+                      for ( ToDo toDoo in _foundToDo.reversed)
                         ToDoItem(todo: toDoo,
                         onToDoChanged: _handleToDoChange,
                         onDeleteItem: _deleteToDoItem,
@@ -61,12 +68,12 @@ class _HomeState extends State<Home> {
                   right: 20,
                   left: 20,
                   ),
-                  padding: EdgeInsets.symmetric(
+                  padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 5),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    boxShadow: [BoxShadow(
+                    boxShadow: const [BoxShadow(
                       color: Colors.grey, 
                       offset: Offset(0.0,0.0),
                       blurRadius: 10.0,
@@ -76,14 +83,14 @@ class _HomeState extends State<Home> {
                   ),
                   child: TextField(
                     controller: _todoController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Add new todo here',
                       border: InputBorder.none
                     ),)
                 )
               ),
               Container(
-                margin: EdgeInsets.only(
+                margin: const EdgeInsets.only(
                   bottom: 20,
                   right: 20,
                 ),
@@ -129,6 +136,23 @@ class _HomeState extends State<Home> {
     _todoController.clear();
   }
 
+  void _runFilter(String enteredKeyWord){
+    List<ToDo> results = [];
+    if( enteredKeyWord.isEmpty){
+      results = todoList;
+    } 
+    else {
+      results = todoList.where(
+        (item) => item.todoText!.
+        toLowerCase().contains(
+          enteredKeyWord.toLowerCase()))
+          .toList();
+    }
+    setState(() {
+      _foundToDo = results;
+    });
+  }
+
   Widget searcBox() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -136,8 +160,9 @@ class _HomeState extends State<Home> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
        ),
-       child: const TextField(
-         decoration: InputDecoration(
+       child: TextField(
+        onChanged: (value) => _runFilter(value),
+         decoration: const InputDecoration(
            contentPadding: EdgeInsets.all(0),
            prefixIcon: Icon(
              Icons.search,
